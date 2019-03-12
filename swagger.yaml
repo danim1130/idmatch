@@ -1,0 +1,70 @@
+swagger: "2.0"
+info:
+  description: "Match face with Id cards."
+  version: "0.0.1"
+  title: "Identification Card Reader"
+host: "localhost:8080"
+basePath: "/api"
+schemes:
+- "http"
+produces:
+- application/json
+- image/png
+paths:
+  /readId:
+    post:
+      summary: "Extract information from the submitted card"
+      description: "The endpoint returns information about the Id card."
+      consumes:
+      - "multipart/form-data"
+      parameters:
+      - name: "image"
+        in: "formData"
+        required: true
+        type: "file"
+      responses:
+        200:
+          description: "The extracted values"
+          schema:
+            $ref: "#/definitions/MatchResult"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /index:
+    get:
+      produces:
+        - text/html
+      responses:
+        200:
+          description: OK
+  /lastIdPicture:
+    get:
+      produces:
+        - image/png
+      responses:
+        200:
+          description: OK
+
+  /lastFacePicture:
+    get:
+      produces:
+        - image/png
+      responses:
+        200:
+          description: OK
+definitions:
+  MatchResult:
+    type: "object"
+    required: ["result"]
+    properties:
+      result:
+        type: "boolean"
+        description: "Is the face matching the card face"
+    example:
+      result: true
+  Error:
+    type: "object"
+    properties:
+      message:
+        type: "string"

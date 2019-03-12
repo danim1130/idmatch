@@ -1,0 +1,82 @@
+---
+swagger: "2.0"
+info:
+  description: "Match face with Id cards."
+  version: "0.0.1"
+  title: "Identification Card Reader"
+host: "localhost:8080"
+basePath: "/api"
+schemes:
+- "http"
+produces:
+- "application/json"
+- "image/png"
+paths:
+  /readId:
+    post:
+      summary: "Extract information from the submitted card"
+      description: "The endpoint returns information about the Id card."
+      operationId: "read_id_post"
+      consumes:
+      - "multipart/form-data"
+      parameters:
+      - name: "image"
+        in: "formData"
+        required: true
+        type: "file"
+      responses:
+        200:
+          description: "The extracted values"
+          schema:
+            $ref: "#/definitions/MatchResult"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "swagger_server.controllers.default_controller"
+  /index:
+    get:
+      operationId: "index"
+      produces:
+        - "text/html"
+      parameters: []
+      responses:
+        200:
+          description: OK
+      x-swagger-router-controller: "swagger_server.controllers.default_controller"
+  /lastIdPicture:
+    get:
+      operationId: "last_id_picture_get"
+      produces:
+      - "image/png"
+      parameters: []
+      responses:
+        200:
+          description: "OK"
+      x-swagger-router-controller: "swagger_server.controllers.default_controller"
+  /lastFacePicture:
+    get:
+      operationId: "last_face_picture_get"
+      produces:
+      - "image/png"
+      parameters: []
+      responses:
+        200:
+          description: "OK"
+      x-swagger-router-controller: "swagger_server.controllers.default_controller"
+definitions:
+  MatchResult:
+    type: "object"
+    required:
+    - "result"
+    properties:
+      result:
+        type: "boolean"
+        description: "Is the face matching the card face"
+    example:
+      result: true
+  Error:
+    type: "object"
+    properties:
+      message:
+        type: "string"
