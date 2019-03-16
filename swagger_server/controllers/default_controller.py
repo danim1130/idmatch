@@ -95,9 +95,12 @@ def read_id_post(image):  # noqa: E501
                 result = "CORRECT"
             else:
                 result = "INCORRECT"
+    except:
+        print("Error caught!")
 
-        if result != "CORRECT" :
-            #print("Not enough matches are found - {}/{}".format(len(good), MIN_MATCH_COUNT))
+    if result != "CORRECT":
+        try:
+            # print("Not enough matches are found - {}/{}".format(len(good), MIN_MATCH_COUNT))
             matches = flann.knnMatch(old_card_des1, des2, k=2)
             # store all the good matches as per Lowe's ratio test.
             good = []
@@ -106,7 +109,7 @@ def read_id_post(image):  # noqa: E501
                     good.append(m)
 
             if len(good) > MIN_MATCH_COUNT:
-                src_pts = np.float32([new_card_kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
+                src_pts = np.float32([old_card_kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
                 dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
                 M, mask = cv.findHomography(dst_pts, src_pts, cv.RANSAC, 5.0)
                 matchesMask = mask.ravel().tolist()
@@ -127,7 +130,7 @@ def read_id_post(image):  # noqa: E501
                 y_zoom = 1.3
                 (x, y, w, h) = selected_face
                 selected_face = (
-                int(x - (x_zoom - 1) / 2 * w), int(y - (y_zoom - 1) / 2 * h), int(x_zoom * w), int(y_zoom * h))
+                    int(x - (x_zoom - 1) / 2 * w), int(y - (y_zoom - 1) / 2 * h), int(x_zoom * w), int(y_zoom * h))
                 (x, y, w, h) = selected_face
                 cv.imwrite("face.png", input_img[y:y + h, x:x + w])
                 selected_face_img = cv.cvtColor(input_img[y:y + h, x:x + w], cv.COLOR_BGR2RGB)
@@ -141,7 +144,7 @@ def read_id_post(image):  # noqa: E501
                     result = "CORRECT"
                 else:
                     result = "INCORRECT"
-    except:
-        print("Error caught!")
+        except:
+            print("Error caught!")
 
     return MatchResult(result)
