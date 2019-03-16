@@ -5,10 +5,37 @@
     <title>Match ID card</title>
 </head>
 <body>
+<video id="videoInput" width="1280" height="720"></video>
+<canvas id="canvasVideo"></canvas>
 <canvas id="myCanvas" width="578" height="200"></canvas>
 <script>
+    let video = document.getElementById("videoInput"); // video is the id of video tag
+    navigator.mediaDevices.getUserMedia({ 
+        video: {
+	        width: { ideal: 4096 },
+	        height: { ideal: 2160 } 
+        } , audio: false })
+        .then(function(stream) {
+	        video.srcObject = stream;
+	        video.play();
+        })
+        .catch(function(err) {
+	    console.log("An error occurred! " + err);
+        });
+    
+    let canvasCtx = document.getElementById("canvasVideo").getContext('2d');
+    video.addEventListener('play', function() {
+        function drawFrame(){
+            canvasCtx.drawImage(video, 0, 0, video.width, video.height);
+            setTimeout(drawFrame, 34);
+        }
+        setTimeout(drawFrame, 0);
+    }, false);
+
     var canvas = document.getElementById('myCanvas');
     var context = canvas.getContext('2d');
+
+
 
     // begin custom shape
     context.beginPath();
@@ -28,7 +55,7 @@
     context.strokeStyle = 'blue';
     context.stroke();
 
-    canvas.toBlob(function (blob) {
+    /*canvas.toBlob(function (blob) {
         var formData = new FormData();
         formData.append("image", blob);
         var request = new XMLHttpRequest();
@@ -39,7 +66,7 @@
                 console.log(request.response);
             }
         }
-    }, 'image/png', 1);
+    }, 'image/png', 1);*/
 </script>
 Hello World!
 </body>
