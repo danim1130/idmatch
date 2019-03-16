@@ -96,7 +96,7 @@ def read_id_post(image):  # noqa: E501
             else:
                 result = "INCORRECT"
 
-        else:
+        if result != "CORRECT" :
             #print("Not enough matches are found - {}/{}".format(len(good), MIN_MATCH_COUNT))
             matches = flann.knnMatch(old_card_des1, des2, k=2)
             # store all the good matches as per Lowe's ratio test.
@@ -110,7 +110,7 @@ def read_id_post(image):  # noqa: E501
                 dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
                 M, mask = cv.findHomography(dst_pts, src_pts, cv.RANSAC, 5.0)
                 matchesMask = mask.ravel().tolist()
-                h, w = (388, 622)
+                h, w = (428, 721)
                 input_id_card_img = cv.warpPerspective(input_img, M, (w, h))
                 cv.imwrite("id_card.png", input_id_card_img)
                 input_id_face_img = cv.cvtColor(input_id_card_img[162:380, 54:230], cv.COLOR_BGR2RGB)
