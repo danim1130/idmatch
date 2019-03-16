@@ -5,69 +5,70 @@
     <title>Match ID card</title>
 </head>
 <body>
-<video id="videoInput" width="1280" height="720"></video>
+<video id="videoInput" width="1280" height="720" hidden="true"></video>
 <canvas id="canvasVideo"></canvas>
-<canvas id="myCanvas" width="578" height="200"></canvas>
+<br />
+<p id="result"></p>
+<img id="card_id"></img>
+<img id="face_id" height="620"></img>
 <script>
-    let video = document.getElementById("videoInput"); // video is the id of video tag
-    navigator.mediaDevices.getUserMedia({ 
-        video: {
-	        width: { ideal: 4096 },
-	        height: { ideal: 2160 } 
-        } , audio: false })
-        .then(function(stream) {
-	        video.srcObject = stream;
-	        video.play();
-        })
-        .catch(function(err) {
-	    console.log("An error occurred! " + err);
-        });
-    
-    let canvasCtx = document.getElementById("canvasVideo").getContext('2d');
-    video.addEventListener('play', function() {
-        function drawFrame(){
-            canvasCtx.drawImage(video, 0, 0, video.width, video.height);
-            setTimeout(drawFrame, 34);
+  let baseUrl = "http://localhost:8080/api";
+  let video = document.getElementById("videoInput"); // video is the id of video tag
+  navigator.mediaDevices.getUserMedia({ 
+    video: {
+      width: { ideal: 4096 },
+      height: { ideal: 2160 } 
+    } , audio: false })
+    .then(function(stream) {
+      video.srcObject = stream;
+      video.play();
+    })
+    .catch(function(err) {
+      console.log("An error occurred! " + err);
+    });
+  
+  let canvas = document.getElementById("canvasVideo");
+  let canvasCtx = canvas.getContext('2d');
+  
+  canvas.width = video.width;
+  canvas.height = video.height;
+  video.addEventListener('play', function() {
+    function drawFrame(){
+        canvasCtx.drawImage(video, 0, 0, video.width, video.height);
+        setTimeout(drawFrame, 34);
+    }
+    setTimeout(drawFrame, 0);
+    setTimeout(doCheck, 1000);
+  }, false);
+
+  let faceImg = document.getElementById('face_id');
+  let cardImg = document.getElementById('card_id');
+  function doCheck(){
+    canvas.toBlob(function (blob) {
+      var formData = new FormData();
+      formData.append("image", blob);
+      var request = new XMLHttpRequest();
+      request.open("POST", baseUrl + "/readId");
+      request.send(formData)
+      request.onreadystatechange = function(){
+        if (request.readyState == 4) {
+          console.log(request.response);
+          let result = JSON.parse(request.response).result;
+          document.getElementById("result").innerHTML = result;
+          if (result != "NOT_FOUND"){
+            faceImg.src = baseUrl + "/lastFacePicture?t=" + new Date().getTime();
+            cardImg.src = baseUrl + "/lastIdPicture?t=" + new Date().getTime();
+            faceImg.hidden = false;
+            cardImg.hidden = false;
+          } else {
+            faceImg.hidden = true;
+            cardImg.hidden = true;
+          }
+          setTimeout(doCheck, 0);
         }
-        setTimeout(drawFrame, 0);
-    }, false);
-
-    var canvas = document.getElementById('myCanvas');
-    var context = canvas.getContext('2d');
-
-
-
-    // begin custom shape
-    context.beginPath();
-    context.moveTo(170, 80);
-    context.bezierCurveTo(130, 100, 130, 150, 230, 150);
-    context.bezierCurveTo(250, 180, 320, 180, 340, 150);
-    context.bezierCurveTo(420, 150, 420, 120, 390, 100);
-    context.bezierCurveTo(430, 40, 370, 30, 340, 50);
-    context.bezierCurveTo(320, 5, 250, 20, 250, 50);
-    context.bezierCurveTo(200, 5, 150, 20, 170, 80);
-
-    // complete custom shape
-    context.closePath();
-    context.lineWidth = 5;
-    context.fillStyle = '#8ED6FF';
-    context.fill();
-    context.strokeStyle = 'blue';
-    context.stroke();
-
-    /*canvas.toBlob(function (blob) {
-        var formData = new FormData();
-        formData.append("image", blob);
-        var request = new XMLHttpRequest();
-        request.open("POST", "http://localhost:8080/api/readId");
-        request.send(formData)
-        request.onreadystatechange = function(){
-            if (request.readyState == 4) {
-                console.log(request.response);
-            }
-        }
-    }, 'image/png', 1);*/
+      }
+    }, 'image/png', 1);
+  }
 </script>
-Hello World!
 </body>
 </html>
